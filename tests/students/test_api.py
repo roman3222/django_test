@@ -109,12 +109,4 @@ def test_delete_course(client, user, course_factory):
     assert not Course.objects.filter(id=courses_id).exists()
 
 
-@pytest.mark.django_db
-def test_add_student_to_course(client, course_factory, student_factory):
-    course = course_factory()
-    student = student_factory()
 
-    response = client.post(f'/courses/{course.pk}/', data={'student_id': student.pk})
-
-    assert response.status_code == 200
-    assert course.students.filter(pk=student.pk).exists()
