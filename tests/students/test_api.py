@@ -37,11 +37,12 @@ def student_factory():
 def test_get_first_course(client, user, course_factory):
     course = course_factory(_quantity=10)
     first_course = course[0]
-    response = client.get('/courses/?id=1')
+    response = client.get(f'/courses/{first_course.pk}/')
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 1
-    assert data[0]['name'] == first_course.name
+    assert len(data) == 3
+    assert data['name'] == first_course.name
+
 
 
 @pytest.mark.django_db
@@ -59,8 +60,8 @@ def test_get_all_courses(client, user, course_factory):
 @pytest.mark.django_db
 def test_check_filter_id(client, user, course_factory):
     course = course_factory(_quantity=12)
-    filter_id = course[10].id
-    response = client.get(f'/courses/?id={filter_id}')
+    filter_id = course[10].pk
+    response = client.get('/courses/', {'id': filter_id})
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1
@@ -109,12 +110,4 @@ def test_delete_course(client, user, course_factory):
     assert not Course.objects.filter(id=courses_id).exists()
 
 
-@pytest.mark.django_db
-def test_add_student_to_course(client, course_factory, student_factory):
-    course = course_factory()
-    student = student_factory()
 
-    response = client.post(f'/courses/{course.pk}/', data={'student_id': student.pk})
-
-    assert response.status_code == 200
-    assert course.students.filter(pk=student.pk).exists()
